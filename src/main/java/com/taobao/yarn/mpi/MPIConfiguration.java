@@ -86,11 +86,17 @@ public class MPIConfiguration extends YarnConfiguration {
     YarnConfiguration.addDefaultResource(MPI_SITE_XML_FILE);
   }
 
+  private void setScratchDir() {
+    set(MPI_SCRATCH_DIR, get("fs.default.name") + "/user/bholt/mpi-tmp");
+  }
+
   public MPIConfiguration() {
     super();
+    setScratchDir();
   }
 
   public MPIConfiguration(Configuration conf) {
     super(conf);
+    setScratchDir();
   }
 }
