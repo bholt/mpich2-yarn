@@ -452,6 +452,11 @@ public class Client {
     LOG.info("Source path: " + mpiAppSrc.toString());
     LOG.info("Destination path: " + mpiAppDst.toString());
     dfs.copyFromLocalFile(false, true, mpiAppSrc, mpiAppDst);
+    String mpiHome = System.getenv("MPI_HOME");
+    LOG.info("@> Copying other MPI files.");
+    dfs.copyFromLocalFile(false, true,
+            new Path(mpiHome+"/bin/smpd"),
+            Utilities.getAppFile(conf, appName, appId, "smpd"));
     FileStatus mpiAppFileStatus = dfs.getFileStatus(mpiAppDst);
 
     // Set the env variables to be setup in the env where the application master will be run

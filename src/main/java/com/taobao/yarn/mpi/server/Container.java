@@ -218,26 +218,39 @@ public class Container {
     return true;
   }
 
+  private void copyExecutable(String name, String srcPath, String dstPath) {
+    File src = new File(srcPath + "/" + name);
+    File dst = new File(dstPath + "/" + name);
+    LOG.info("@> copying " + src + "\n@> -> " + dst);
+    LocalFileUtils.copyFile(src, dst);
+    dst.setExecutable(true);
+  }
+
   /**
    * Copy necessary files needed for the MPI program
    */
   public void copyMPIExecutable() {
-    Map<String, String> envs = System.getenv();
-    String mpiExecDir = envs.get("MPIEXECDIR");
+    Map<String, String> env = System.getenv();
+    String mpiExecDir = env.get("MPIEXECDIR");
     LocalFileUtils.mkdirs(mpiExecDir);
-    File mpiexecCwd = new File("./MPIExec");
-    File mpiexecSame = new File(mpiExecDir + "/MPIExec");
-    LocalFileUtils.copyFile(mpiexecCwd, mpiexecSame);
-    mpiexecSame.setExecutable(true);
+    copyExecutable("MPIExec", ".", mpiExecDir);
+    copyExecutable("smpd", ".", mpiExecDir);
   }
 
-  public Boolean run() throws IOException{
+  public Boolean run() throws IOException {
     Runtime rt = Runtime.getRuntime();
     // Hacked the smpd_cmd_args.c, to add an option set bService
-    String cmdLine = "smpd -phrase " + phrase
-        + " -port " + smpdPort + " -yarn";
-    LOG.info("Launching SMPD Command: " + cmdLine);
-    final Process pc = rt.exec(cmdLine);
+    LOG.info("Launching SMPD Command.");
+
+    //final Process pc = rt.exec(cmdLine);
+    final Process pc = rt.exec(new String[]{
+      // command
+      System.getenv("MPIEXECDIR") + "/smpd","-phrase",phrase,"-port",smpdPort,"-yarn"
+    }, new String[]{
+      // environment
+      "PATH=."
+    });
+
     // If we get the reference of the process, we get the running daemon.
     if (pc != null) {
       protocol.reportStatus(containerId, MPDStatus.MPD_STARTED);

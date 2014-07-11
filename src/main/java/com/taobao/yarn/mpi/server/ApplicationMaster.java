@@ -916,6 +916,25 @@ public class ApplicationMaster extends CompositeService {
       this.results = results;
     }
 
+    private boolean addLocalResource(String loc, Map<String, LocalResource> localResources) {
+      assert(!loc.isEmpty());
+      LocalResource rsrc = Records.newRecord(LocalResource.class);
+      rsrc.setType(LocalResourceType.FILE);
+      rsrc.setVisibility(LocalResourceVisibility.PUBLIC);
+      try {
+        rsrc.setResource(ConverterUtils.getYarnUrlFromURI(new URI(loc)));
+      } catch (URISyntaxException e) {
+        LOG.error("Error when trying to use mpi application path specified in env"
+          + ", path=" + loc);
+        e.printStackTrace();
+        return false;
+      }
+      rsrc.setTimestamp(hdfsMPIExecTimestamp);
+      rsrc.setSize(hdfsMPIExecLen);
+      localResources.put("MPIExec", rsrc);
+      return true;
+    }
+
     /**
      * Connects to CM, sets up container launch context
      * for shell command and eventually dispatches the container
@@ -1065,9 +1084,12 @@ public class ApplicationMaster extends CompositeService {
    * @return ContainerAllocation reference
    */
   private ContainersAllocator createContainersAllocator() throws YarnException {
+    //ContainersAllocator allocator = ContainersAllocator.newInstanceByName(
+    //    System.getenv(MPIConstants.ALLOCATOR), rmClient, requestPriority,
+    //    containerMemory, appAttemptID);
     ContainersAllocator allocator = ContainersAllocator.newInstanceByName(
-        System.getenv(MPIConstants.ALLOCATOR), rmClient, requestPriority,
-        containerMemory, appAttemptID);
+            "com.taobao.yarn.mpi.allocator.DistinctContainersAllocator", rmClient, requestPriority,
+            containerMemory, appAttemptID);
 
     return allocator;
   }

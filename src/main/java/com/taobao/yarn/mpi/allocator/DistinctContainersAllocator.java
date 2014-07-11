@@ -58,8 +58,8 @@ public class DistinctContainersAllocator extends ContainersAllocator {
    * Constructor
    * @throws YarnException
    */
-  public DistinctContainersAllocator(AMRMClient rmClient, int requestPriority,
-      int containerMemory, ApplicationAttemptId appAttemptId)
+  public DistinctContainersAllocator(AMRMClient rmClient, Integer requestPriority,
+      Integer containerMemory, ApplicationAttemptId appAttemptId)
       throws YarnException {
     super(rmClient);
 

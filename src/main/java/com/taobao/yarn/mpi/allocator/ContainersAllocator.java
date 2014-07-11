@@ -46,6 +46,7 @@ public abstract class ContainersAllocator {
           requestPriority, containerMemory, appAttemptID);
     } catch (Exception e) {
       LOG.error("Error constructing containers allocator in class " + className);
+      e.printStackTrace();
       return null;
     }
   }
